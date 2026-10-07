@@ -16,27 +16,50 @@ class DataManager:
             {"name": "Товар 2 (Пример)", "price": 300, "stock": 5}
         ]
 
-def create_product_tile(item):
-    return ft.Container(
-        content=ft.ListTile(
-            leading=ft.Icon(ft.Icons.INVENTORY, color="teal"),
-            title=ft.Text(
-                item["name"], 
-                weight=ft.FontWeight.BOLD,
-                size=16,
-                selectable=True
+
+class AppHeader(ft.Container):
+    def __init__(self, title_text="1С: Номенклатура товаров"):
+        super().__init__(
+            content=ft.Text(f" {title_text}", size=20, weight="bold", color="teal"),
+            padding=ft.padding.symmetric(horizontal=12, vertical=6),
+            border_radius=6,
+            bgcolor="teal50"
+        )
+
+
+class SearchField(ft.TextField):
+    def __init__(self, on_change_callback):
+        super().__init__(
+            hint_text="Поиск по названию...", 
+            width=260, 
+            prefix_icon=ft.Icons.SEARCH,
+            border_radius=8,
+            on_change=on_change_callback
+        )
+
+
+class ProductTile(ft.Container):
+    def __init__(self, item):
+        super().__init__(
+            content=ft.ListTile(
+                leading=ft.Icon(ft.Icons.INVENTORY, color="teal"),
+                title=ft.Text(
+                    item["name"], 
+                    weight=ft.FontWeight.BOLD,
+                    size=16,
+                    selectable=True
+                ),
+                subtitle=ft.Text(
+                    f"Цена: {item['price']} смн  •  Остаток: {item['stock']} шт.",
+                    color="grey700"
+                ),
+                is_three_line=True
             ),
-            subtitle=ft.Text(
-                f"Цена: {item['price']} смн  •  Остаток: {item['stock']} шт.",
-                color="grey700"
-            ),
-            is_three_line=True
-        ),
-        padding=ft.padding.all(8),
-        border=ft.border.all(1, "grey300"),
-        border_radius=8,
-        margin=ft.margin.only(bottom=8)
-    )
+            padding=ft.padding.all(8),
+            border=ft.border.all(1, "grey300"),
+            border_radius=8,
+            margin=ft.margin.only(bottom=8)
+        )
 
 class OneCApp:
     def __init__(self, page: ft.Page):
@@ -50,23 +73,9 @@ class OneCApp:
 
     def init_ui(self):
         
-        self.title_container = ft.Container(
-            content=ft.Text(" 1С: Номенклатура товаров", size=20, weight="bold", color="teal"),
-            padding=ft.padding.symmetric(horizontal=12, vertical=6),
-            border_radius=6,
-            bgcolor="teal50"
-        )
+        self.title_container = AppHeader("1С: Номенклатура товаров")
+        self.search_input = SearchField(self.filter_items)
         
-       
-        self.search_input = ft.TextField(
-            hint_text="Поиск по названию...", 
-            width=260, 
-            prefix_icon=ft.Icons.SEARCH,
-            border_radius=8,
-            on_change=self.filter_items
-        )
-        
-       
         self.refresh_btn = ft.Button(
             "Синхр. 1С", 
             icon=ft.Icons.REFRESH, 
@@ -107,7 +116,7 @@ class OneCApp:
         self.items_list.controls.clear()
         data = self.db.load_data()
         for item in data:
-            self.items_list.controls.append(create_product_tile(item))
+            self.items_list.controls.append(ProductTile(item))
         self.page.update()
 
     def refresh_data(self, e):
@@ -120,7 +129,7 @@ class OneCApp:
         data = self.db.load_data()
         for item in data:
             if query in item["name"].lower():
-                self.items_list.controls.append(create_product_tile(item))
+                self.items_list.controls.append(ProductTile(item))
         self.page.update()
 
 def main(page: ft.Page):
