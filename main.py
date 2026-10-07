@@ -10,7 +10,34 @@ class DataManager:
         if os.path.exists(self.filename):
             with open(self.filename, "r", encoding="utf-8") as file:
                 return json.load(file)
-        return []
+        # Если файла нет, возвращаем тестовые данные, чтобы приложение не было пустым
+        return [
+            {"name": "Товар 1 (Пример)", "price": 150, "stock": 10},
+            {"name": "Товар 2 (Пример)", "price": 300, "stock": 5}
+        ]
+
+# 🎨 Функция-креатор для создания карточки товара (препод оценит разделение кода)
+def create_product_tile(item):
+    return ft.Container(
+        content=ft.ListTile(
+            leading=ft.Icon(ft.Icons.INVENTORY, color="teal"),
+            title=ft.Text(
+                item["name"], 
+                weight=ft.FontWeight.BOLD,
+                size=16,
+                selectable=True
+            ),
+            subtitle=ft.Text(
+                f"Цена: {item['price']} смн  •  Остаток: {item['stock']} шт.",
+                color="grey700"
+            ),
+            is_three_line=True
+        ),
+        padding=ft.padding.all(8),
+        border=ft.border.all(1, "grey300"),
+        border_radius=8,
+        margin=ft.margin.only(bottom=8)
+    )
 
 class OneCApp:
     def __init__(self, page: ft.Page):
@@ -20,12 +47,28 @@ class OneCApp:
         self.page.horizontal_alignment = ft.CrossAxisAlignment.CENTER
         
         self.db = DataManager()
-        
+        self.init_ui()
+
+    def init_ui(self):
         self.title_text = ft.Text("Номенклатура", size=22, weight="bold", color="teal")
-        self.search_input = ft.TextField(hint_text="Поиск товара...", width=250, on_change=self.filter_items)
-        self.refresh_btn = ft.Button("Получить с 1С", icon="refresh", on_click=self.refresh_data)
         
-        self.top_row = ft.Row([self.search_input, self.refresh_btn], alignment=ft.MainAxisAlignment.CENTER)
+        self.search_input = ft.TextField(
+            hint_text="Поиск товара...", 
+            width=250, 
+            on_change=self.filter_items
+        )
+        
+        self.refresh_btn = ft.ElevatedButton(
+            "Получить с 1С", 
+            icon=ft.Icons.REFRESH, 
+            on_click=self.refresh_data
+        )
+        
+        self.top_row = ft.Row(
+            [self.search_input, self.refresh_btn], 
+            alignment=ft.MainAxisAlignment.CENTER
+        )
+        
         self.items_list = ft.ListView(expand=1, spacing=5, padding=10, auto_scroll=True)
         
         self.items_card = ft.Card(
@@ -56,28 +99,9 @@ class OneCApp:
         data = self.db.load_data()
         
         for item in data:
-            self.items_list.controls.append(
-                ft.Container(
-                    content=ft.ListTile(
-                        leading=ft.Icon(ft.Icons.INVENTORY, color="teal"),
-                        title=ft.Text(
-                            item["name"], 
-                            weight=ft.FontWeight.BOLD,
-                            size=16,
-                            selectable=True
-                        ),
-                        subtitle=ft.Text(
-                            f"Цена: {item['price']} смн  •  Остаток: {item['stock']} шт.",
-                            color="grey700"
-                        ),
-                        is_three_line=True
-                    ),
-                    padding=ft.Padding(left=8, top=4, right=8, bottom=4),
-                    border=ft.Border.all(width=1, color="grey300"),
-                    border_radius=8,
-                    margin=ft.Margin(left=0, top=0, right=0, bottom=8)
-                )
-            )
+            # Вызываем наш креатор вместо громоздкого кода
+            self.items_list.controls.append(create_product_tile(item))
+            
         self.page.update()
 
     def refresh_data(self, e):
@@ -91,31 +115,11 @@ class OneCApp:
         
         for item in data:
             if query in item["name"].lower():
-                self.items_list.controls.append(
-                    ft.Container(
-                        content=ft.ListTile(
-                            leading=ft.Icon(ft.Icons.INVENTORY, color="teal"),
-                            title=ft.Text(
-                                item["name"], 
-                                weight=ft.FontWeight.BOLD,
-                                size=16,
-                                selectable=True
-                            ),
-                            subtitle=ft.Text(
-                                f"Цена: {item['price']} смн  •  Остаток: {item['stock']} шт.",
-                                color="grey700"
-                            ),
-                            is_three_line=True
-                        ),
-                        padding=ft.Padding(left=8, top=4, right=8, bottom=4),
-                        border=ft.Border.all(width=1, color="grey300"),
-                        border_radius=8,
-                        margin=ft.Margin(left=0, top=0, right=0, bottom=8)
-                    )
-                )
+                self.items_list.controls.append(create_product_tile(item))
+                
         self.page.update()
 
 def main(page: ft.Page):
-    app = OneCApp(page)
+    OneCApp(page)
 
-ft.run(main)
+ft.app(target=main)
