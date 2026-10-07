@@ -99,7 +99,7 @@ class OneCApp:
         data = self.db.load_data()
         
         for item in data:
-            # Вызываем наш креатор вместо громоздкого кода
+            
             self.items_list.controls.append(create_product_tile(item))
             
         self.page.update()
@@ -122,4 +122,4 @@ class OneCApp:
 def main(page: ft.Page):
     OneCApp(page)
 
-ft.app(target=main)
+ft.run(main)
