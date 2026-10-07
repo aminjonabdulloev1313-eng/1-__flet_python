@@ -16,7 +16,6 @@ class DataManager:
             {"name": "Товар 2 (Пример)", "price": 300, "stock": 5}
         ]
 
-
 def create_product_tile(item):
     return ft.Container(
         content=ft.ListTile(
@@ -50,16 +49,26 @@ class OneCApp:
         self.init_ui()
 
     def init_ui(self):
-        self.title_text = ft.Text("Номенклатура", size=22, weight="bold", color="teal")
         
+        self.title_container = ft.Container(
+            content=ft.Text(" 1С: Номенклатура товаров", size=20, weight="bold", color="teal"),
+            padding=ft.padding.symmetric(horizontal=12, vertical=6),
+            border_radius=6,
+            bgcolor="teal50"
+        )
+        
+       
         self.search_input = ft.TextField(
-            hint_text="Поиск товара...", 
-            width=250, 
+            hint_text="Поиск по названию...", 
+            width=260, 
+            prefix_icon=ft.Icons.SEARCH,
+            border_radius=8,
             on_change=self.filter_items
         )
         
-        self.refresh_btn = ft.ElevatedButton(
-            "Получить с 1С", 
+       
+        self.refresh_btn = ft.Button(
+            "Синхр. 1С", 
             icon=ft.Icons.REFRESH, 
             on_click=self.refresh_data
         )
@@ -75,14 +84,14 @@ class OneCApp:
             content=ft.Container(
                 content=self.items_list,
                 padding=10,
-                width=450,
-                height=300
+                width=480,
+                height=320
             )
         )
         
         self.main_column = ft.Column(
             [
-                self.title_text,
+                self.title_container,
                 self.top_row,
                 self.items_card
             ],
@@ -97,11 +106,8 @@ class OneCApp:
     def load_catalog(self):
         self.items_list.controls.clear()
         data = self.db.load_data()
-        
         for item in data:
-            
             self.items_list.controls.append(create_product_tile(item))
-            
         self.page.update()
 
     def refresh_data(self, e):
@@ -112,11 +118,9 @@ class OneCApp:
         query = self.search_input.value.lower() if self.search_input.value else ""
         self.items_list.controls.clear()
         data = self.db.load_data()
-        
         for item in data:
             if query in item["name"].lower():
                 self.items_list.controls.append(create_product_tile(item))
-                
         self.page.update()
 
 def main(page: ft.Page):
