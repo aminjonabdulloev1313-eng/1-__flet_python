@@ -10,13 +10,13 @@ class DataManager:
         if os.path.exists(self.filename):
             with open(self.filename, "r", encoding="utf-8") as file:
                 return json.load(file)
-        # Если файла нет, возвращаем тестовые данные, чтобы приложение не было пустым
+       
         return [
             {"name": "Товар 1 (Пример)", "price": 150, "stock": 10},
             {"name": "Товар 2 (Пример)", "price": 300, "stock": 5}
         ]
 
-# 🎨 Функция-креатор для создания карточки товара (препод оценит разделение кода)
+
 def create_product_tile(item):
     return ft.Container(
         content=ft.ListTile(
